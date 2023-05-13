@@ -14,6 +14,40 @@ https://www.oreilly.co.jp/books/9784873118222/
 ```Read-Eval-Print-Loop```
 コンソールとかインタラクティブモードとか言ったりもする(シェル的なそれ)
 
+## 構文解析器(parser)
+やっていることはJavascriptの```Json.parse```と本質的に同じ
+```Json.parse```とかは、シリアライズ形式のパーサー(デシリアライズ: 文字列 -> javascriptのobject)
+
+### parser generator
+↑ その名の通り、parserを**作る**もの(parser自体ではない)
+
+RubyKaigiでよく聞いた, ```yacc, bison```はこれに当たる
+
+https://ja.wikipedia.org/wiki/%E3%83%91%E3%83%BC%E3%82%B5%E3%82%B8%E3%82%A7%E3%83%8D%E3%83%AC%E3%83%BC%E3%82%BF
+
+- **言語を作る場合は自分で構文解析器を書くなんてことはほとんどなく、parser generatorを使って構文解析器を生成するのが普通**
+- が、このtutorialでは構文解析器を自作する
+
+### 構文解析器の形式
+- トップダウン構文解析器: ASTのルートノードから構築を開始して下がっていく
+- ボトムダウン構文解析器: ↑の逆
+
+### ソースコードを評価するにあたって
+式と文の違いは何か
+- ```式```: 値を生成する(```5```) <- expression
+- ```文```: 値を生成しない(```let x = 5```)
+
+>In programming, an expression is a value, or anything that executes and ends up being a value. 
+
+- 何が式で何が文かはその言語によって変わってくる
+    - 条件分岐が式になるものもある(実際にrubyはそう)
+```ruby
+  a = if 10 > 9
+        true
+      else
+        false
+      end
+```
 
 ## Goのドメイン知識
 
