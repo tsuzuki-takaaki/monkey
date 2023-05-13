@@ -19,6 +19,16 @@ const (
 	// 演算子
 	ASSIGN = "="
 	PLUS = "+"
+	MINUS = "-"
+	BANG = "!"
+	ASTERRISK = "*"
+	SLASH = "/"
+
+	LT = "<"
+	RT = ">"
+
+	EQ = "=="
+	NOT_EQ = "!="
 
 	// デリミタ
 	COMMA = ","
@@ -32,12 +42,22 @@ const (
 	// キーワード
 	FUNCTION = "FUNCTION"
 	LET = "LET"
+	TRUE = "TRUE"
+	FALSE = "FALSE"
+	IF = "IF"
+	ELSE = "ELSE"
+	RETURN = "RETURN"
 )
 
 // 変数宣言 or 関数宣言 or ((変数・関数)名)
 var keywords = map[string]TokenType {
 	"fn": FUNCTION,
 	"let": LET,
+	"true": TRUE,
+	"false": FALSE,
+	"if": IF,
+	"else": ELSE,
+	"return": RETURN,
 }
 
 func LookupIdent(ident string) TokenType {

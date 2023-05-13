@@ -34,17 +34,46 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		if (l.peekChar() == '=') {
+			// newTokenでは1charactorしか対応していないためnewTokenでwrapされてる処理をそのまま書く
+			// Todo[extend newToken or create new function]
+			ch := l.ch
+			// just increment
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.EQ, Literal: literal}
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
+	case '+':
+		tok = newToken(token.PLUS, l.ch)
+	case '-':
+		tok = newToken(token.MINUS, l.ch)
+	case '!':
+		if (l.peekChar() == '=') {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.NOT_EQ, Literal: literal}
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
+	case '*':
+		tok = newToken(token.ASTERRISK, l.ch)
+	case '/':
+		tok = newToken(token.SLASH, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.RT, l.ch)
+	case ',':
+		tok = newToken(token.COMMA, l.ch)
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case '(':
 		tok = newToken(token.LPAREN, l.ch)
 	case ')':
 		tok = newToken(token.RPAREN, l.ch)
-	case ',':
-		tok = newToken(token.COMMA, l.ch)
-	case '+':
-		tok = newToken(token.PLUS, l.ch)
 	case '{':
 		tok = newToken(token.LBRACE, l.ch)
 	case '}':
@@ -66,6 +95,7 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	}
 
+	// pointerを動かす処理(文字に対するindexがインクリメントする(Lexer.position))
 	l.readChar()
 	return tok
 }
@@ -85,11 +115,21 @@ func(l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
+// ch can handle single character because it is byte
+// == and != is not handled
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
 // helper
+func (l * Lexer) peekChar() byte {
+	// 先読みして、直後の文字を返す
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+}
 // this is not function but method and receiver is Lexer instances
 func (l *Lexer) readChar() {
 	if l.readPosition >= len(l.input) {
