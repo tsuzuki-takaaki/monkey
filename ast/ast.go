@@ -47,6 +47,15 @@ type Identifier struct {
 	Value string
 }
 
-// to get Expression interface
+// to get Node and Expression interface
 func (i *Identifier) expressionNode() {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+
+type ReturnStatement struct {
+	Token token.Token  // token.RETURN
+	ReturnValue Expression
+}
+
+// to get Node and Expression interface
+func (i *ReturnStatement) statementNode() {}
+func (i *ReturnStatement) TokenLiteral() string { return i.Token.Literal }

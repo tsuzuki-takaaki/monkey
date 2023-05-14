@@ -1,17 +1,17 @@
 package parser
 
 import (
+	"fmt"
 	"monkey/ast"
 	"monkey/lexer"
 	"monkey/token"
-	"fmt"
 )
 
 type Parser struct {
-	l *lexer.Lexer			// pointer of Lexer instance
-	errors []string
-	curToken token.Token // 現在調べているtoken
-	peekToken token.Token  // 次のtokenを確認する用
+	l         *lexer.Lexer // pointer of Lexer instance
+	errors    []string
+	curToken  token.Token // 現在調べているtoken
+	peekToken token.Token // 次のtokenを確認する用
 }
 
 // l: token sequence
@@ -24,7 +24,7 @@ type Parser struct {
 // {Type:; Literal:;}
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l: l,
+		l:      l,
 		errors: []string{},
 	}
 	// 2つトークンを読み込む -> curTokenとpeekTokenの両方がセットされる
@@ -52,7 +52,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	// initialize Program(root node)
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
-	// Ex. 
+	// Ex.
 	// instance of Program {
 	// 	Statements: [
 	// 		Statement{},
@@ -76,6 +76,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.RETURN:
+		return p.pasrseReturnStatement()
 	default:
 		return nil
 	}
@@ -104,6 +106,18 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	return stmt
 }
 
+func (p *Parser) pasrseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: p.curToken}
+	p.nextToken()
+
+	for !p.curTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+// helper
 // 引数に渡されたtokenとcurTokenが一致しているか判定する
 func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.curToken.Type == t

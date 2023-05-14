@@ -1,16 +1,17 @@
 package parser
 
 import (
-	"testing"
 	"monkey/ast"
 	"monkey/lexer"
+	"testing"
 )
 
+// TEST for 'let' statement
 func TestLetStatements(t *testing.T) {
 	input := `
-	let x 5;
+	let x = 5;
 	let y = 10;
-	let foobar 88888883;
+	let foobar = 88888883;
 	`
 
 	// initialize Lexer and will return token sequence
@@ -25,13 +26,14 @@ func TestLetStatements(t *testing.T) {
 	if program == nil {
 		t.Fatalf("ParseProgram() returned nil")
 	}
+	// 3 is input samples count
 	if len(program.Statements) != 3 {
 		t.Fatalf("program.Statements doen not contain 3 statements, got=%d", len(program.Statements))
 	}
 
 	tests := []struct {
 		expectedIdentifier string
-	} {
+	}{
 		{"x"},
 		{"y"},
 		{"foobar"},
@@ -80,4 +82,34 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	}
 
 	return true
+}
+
+// TEST for 'return' statement()
+func TestReturnStatements(t *testing.T) {
+	input := `
+	return 5;
+	return 100;
+	return 999222;
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
+	}
+
+	for _, stmt := range program.Statements {
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("stmt not *ast.ReturnStatement. got=%T", stmt)
+		}
+		if returnStmt.TokenLiteral() != "return" {
+			t.Errorf("returnStmt.TokenLiteral not 'return', got=%q", returnStmt.TokenLiteral())
+		}
+	}
+
 }

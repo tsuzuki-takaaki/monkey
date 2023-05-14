@@ -95,5 +95,10 @@ https://ja.wikipedia.org/wiki/%E3%83%91%E3%83%BC%E3%82%B5%E3%82%B8%E3%82%A7%E3%8
 	return IDENT
 ```
 ↑ mapに該当のkeyがあった場合はif文がtrueとして処理される
+- Goでstructの中身を表示したい時
+  - https://stackoverflow.com/questions/24512112/how-to-print-struct-variables-in-console
+```go
+  fmt.Printf("%+v\n", someStruct)
+```
 
 https://qiita.com/rock619/items/db44507d02814e490902
