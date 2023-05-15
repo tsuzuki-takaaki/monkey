@@ -3,35 +3,35 @@ package token
 type TokenType string // name string type TokenType(stirng == TokenType)
 
 type Token struct {
-	Type TokenType
+	Type    TokenType
 	Literal string
 }
 
 // Token Type(スクリプト言語をこれにマッピングする)
 const (
 	ILLEGAL = "ILLEGAL"
-	EOF = "EOF"
+	EOF     = "EOF"
 
 	// 識別子 + リテラル
 	IDENT = "IDENT" // add, foobar, x, y, ...
-	INT = "INT" // 1334334...
+	INT   = "INT"   // 1334334...
 
 	// 演算子
-	ASSIGN = "="
-	PLUS = "+"
-	MINUS = "-"
-	BANG = "!"
+	ASSIGN    = "="
+	PLUS      = "+"
+	MINUS     = "-"
+	BANG      = "!"
 	ASTERRISK = "*"
-	SLASH = "/"
+	SLASH     = "/"
 
 	LT = "<"
 	RT = ">"
 
-	EQ = "=="
+	EQ     = "=="
 	NOT_EQ = "!="
 
 	// デリミタ
-	COMMA = ","
+	COMMA     = ","
 	SEMICOLON = ";"
 
 	LPAREN = "("
@@ -41,22 +41,22 @@ const (
 
 	// キーワード
 	FUNCTION = "FUNCTION"
-	LET = "LET"
-	TRUE = "TRUE"
-	FALSE = "FALSE"
-	IF = "IF"
-	ELSE = "ELSE"
-	RETURN = "RETURN"
+	LET      = "LET"
+	TRUE     = "TRUE"
+	FALSE    = "FALSE"
+	IF       = "IF"
+	ELSE     = "ELSE"
+	RETURN   = "RETURN"
 )
 
 // 変数宣言 or 関数宣言 or ((変数・関数)名)
-var keywords = map[string]TokenType {
-	"fn": FUNCTION,
-	"let": LET,
-	"true": TRUE,
-	"false": FALSE,
-	"if": IF,
-	"else": ELSE,
+var keywords = map[string]TokenType{
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
 	"return": RETURN,
 }
 

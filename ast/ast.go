@@ -1,9 +1,13 @@
 package ast
 
-import "monkey/token"
+import (
+	"bytes"
+	"monkey/token"
+)
 
 type Node interface {
 	TokenLiteral() string
+	String() string
 }
 
 type Statement interface {
@@ -30,32 +34,109 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+// for reviving program from token sequences
+// create buffer and write string in the buffer and return
+func (p *Program) String() string {
+	var out bytes.Buffer
+	for _, s := range p.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
 // Token  Name  Value
-//  let    x  =  5
+//
+//	let    x  =  5
+//
+// example -> &{Token:{Type:LET Literal:let} Name:0xc00007e5d0 Value:<nil>}
+// ↓ AST examples
+//
+//	&LetStatement{
+//		Token: token.Token{Type: token.LET, Literal: "let"},
+//		Name: &Identifier{
+//			Token: token.Token{Type: token.IDENT, Literal: "myVar"},
+//			Value: "myVar",
+//		},
+//		Value: &Identifier{
+//			Token: token.Token{Type: token.IDENT, Literal: "anotherVar"},
+//			Value: "anotherVar",
+//		},
+//	},
+//
+// 文全体としてstruct
 type LetStatement struct {
-	Token token.Token  // token.LET token
-	Name *Identifier
+	Token token.Token // token.LET token
+	Name  *Identifier
 	Value Expression
 }
 
 // to get Statement interface
-func (ls *LetStatement) statementNode() {}
+func (ls *LetStatement) statementNode()       {}
 func (ls *LetStatement) TokenLiteral() string { return ls.Token.Literal }
+func (ls *LetStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ls.TokenLiteral() + " ")
+	out.WriteString(ls.Name.String())
+	out.WriteString(" = ")
+
+	if ls.Value != nil {
+		out.WriteString(ls.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
 
 type Identifier struct {
-	Token token.Token  // token.IDENT token
+	Token token.Token // token.IDENT token
 	Value string
 }
 
 // to get Node and Expression interface
-func (i *Identifier) expressionNode() {}
+func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+func (i *Identifier) String() string       { return i.Value }
 
+// Token   ReturnValue
+//
+// return       5
 type ReturnStatement struct {
-	Token token.Token  // token.RETURN
+	Token       token.Token // token.RETURN
 	ReturnValue Expression
 }
 
 // to get Node and Expression interface
-func (i *ReturnStatement) statementNode() {}
+func (i *ReturnStatement) statementNode()       {}
 func (i *ReturnStatement) TokenLiteral() string { return i.Token.Literal }
+func (rs *ReturnStatement) String() string {
+	var out bytes.Buffer
+
+	if rs.ReturnValue != nil {
+		out.WriteString(rs.ReturnValue.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
+// ExpressionStatement example
+// let x = 10;
+// x + 5;       <- this is the example
+type ExpressionStatement struct {
+	Token      token.Token
+	Expression Expression
+}
+
+func (i *ExpressionStatement) statementNode()       {}
+func (i *ExpressionStatement) TokenLiteral() string { return i.Token.Literal }
+func (es *ExpressionStatement) String() string {
+	if es.Expression != nil {
+		return es.Expression.String()
+	}
+
+	return ""
+}

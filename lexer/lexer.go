@@ -3,22 +3,22 @@ package lexer
 import "monkey/token"
 
 type Lexer struct {
-	input string
-	position int    // 入力における現在の位置
-	readPosition int // これから読み込む位置(this will be used like l.input[l.readPosition])
-	ch byte  // 現在調査中の文字
+	input        string
+	position     int  // 入力における現在の位置
+	readPosition int  // これから読み込む位置(this will be used like l.input[l.readPosition])
+	ch           byte // 現在調査中の文字
 }
 
 // initializer
-                      // Lexer型のポインタを返す関数
+// Lexer型のポインタを返す関数
 func New(input string) *Lexer {
-			// この&は初期化した値のポインタを抽出するため(この時点で変数lはLexer構造体によって生成されたインスタンスのポインタ) 
+	// この&は初期化した値のポインタを抽出するため(この時点で変数lはLexer構造体によって生成されたインスタンスのポインタ)
 	l := &Lexer{input: input}
-	// EX: 
+	// EX:
 	// l = instance of Lexer {
 	// 	input: `=+(){},;`,
-	// 	position: 
-	// 	readPostion: 
+	// 	position:
+	// 	readPostion:
 	// 	ch
 	// }
 
@@ -34,7 +34,7 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		if (l.peekChar() == '=') {
+		if l.peekChar() == '=' {
 			// newTokenでは1charactorしか対応していないためnewTokenでwrapされてる処理をそのまま書く
 			// Todo[extend newToken or create new function]
 			ch := l.ch
@@ -50,7 +50,7 @@ func (l *Lexer) NextToken() token.Token {
 	case '-':
 		tok = newToken(token.MINUS, l.ch)
 	case '!':
-		if (l.peekChar() == '=') {
+		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
 			literal := string(ch) + string(l.ch)
@@ -100,14 +100,14 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
-func(l *Lexer) skipWhitespace() {
+func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
 		l.readChar()
 	}
 }
 
 // 非英字が現れるまで読み込む
-func(l *Lexer) readIdentifier() string {
+func (l *Lexer) readIdentifier() string {
 	position := l.position
 	for isLetter(l.ch) {
 		l.readChar()
@@ -122,7 +122,7 @@ func newToken(tokenType token.TokenType, ch byte) token.Token {
 }
 
 // helper
-func (l * Lexer) peekChar() byte {
+func (l *Lexer) peekChar() byte {
 	// 先読みして、直後の文字を返す
 	if l.readPosition >= len(l.input) {
 		return 0
@@ -130,10 +130,11 @@ func (l * Lexer) peekChar() byte {
 		return l.input[l.readPosition]
 	}
 }
+
 // this is not function but method and receiver is Lexer instances
 func (l *Lexer) readChar() {
 	if l.readPosition >= len(l.input) {
-		l.ch = 0    // means "NUL[ASCII]" <= 終端を表す
+		l.ch = 0 // means "NUL[ASCII]" <= 終端を表す
 	} else {
 		l.ch = l.input[l.readPosition]
 	}
@@ -147,7 +148,7 @@ func isLetter(ch byte) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
 
-func (l *Lexer) readNumber() string{
+func (l *Lexer) readNumber() string {
 	position := l.position
 	for isDigit(l.ch) {
 		l.readChar()
