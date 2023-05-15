@@ -54,7 +54,17 @@ https://ja.wikipedia.org/wiki/%E3%83%91%E3%83%BC%E3%82%B5%E3%82%B8%E3%82%A7%E3%8
 
 ## Goのドメイン知識
 
-- ```:=```: 初期化かつ代入
+- Goの変数宣言
+- 初期値なし
+```go
+    var s string
+```
+- 初期値あり
+```go
+    var s string = "hello world"
+    // or
+    s := "hello world"
+```
 - ```文字列```
     - ```ダブルクォート```: 改行を含めることはできず、バックスラッシュ\によるエスケープは解釈される。
     - ```バッククォート```: バッククォート以外の改行を含めたすべての文字を書くことができる。バックスラッシュのエスケープは解釈されない。
@@ -95,10 +105,34 @@ https://ja.wikipedia.org/wiki/%E3%83%91%E3%83%BC%E3%82%B5%E3%82%B8%E3%82%A7%E3%8
 	return IDENT
 ```
 ↑ mapに該当のkeyがあった場合はif文がtrueとして処理される
-- Goでstructの中身を表示したい時
-  - https://stackoverflow.com/questions/24512112/how-to-print-struct-variables-in-console
+- Goのinterface
+    - https://trap.jp/post/1445/
+    - ↓ 定義方法
 ```go
-  fmt.Printf("%+v\n", someStruct)
+    type 名前 interface {
+        メソッド メソッドでreturnされる型
+    }
+
+    // ex
+    type Node interface {
+        TokenLiteral() string
+    }
+```
+↑ の例だと、「```Node```というのは、```TokenLiteralメソッド```を持つインターフェイスです」の意になる
+<=> ```TokenLiteral```メソッドを持つということは```Node```インターフェイスを持っている
+
+- <font color=red>**ダックタイピング**</font>味が強いなと思った
+- Goのtype function
+    - 第一級関数として、変数に入れられるため変数の型として、関数の型を定義することができる
+```go
+    // よくあるやつ
+    var s string
+    s = "hello world"
+    
+    // type function
+    type StStFunc func(st string) string
+    var func_variable StStFunc
+    // ↑ このように定義すると、func_variableにはStStFunc型のデータしか入れることができなくなる
 ```
 
 https://qiita.com/rock619/items/db44507d02814e490902
