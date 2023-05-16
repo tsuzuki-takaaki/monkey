@@ -5,6 +5,7 @@ import (
 	"monkey/ast"
 	"monkey/lexer"
 	"monkey/token"
+	"strconv"
 )
 
 // priority of parser
@@ -55,6 +56,8 @@ func New(l *lexer.Lexer) *Parser {
 	// 	prefixParseFns: {token.IDENT: parseIdentifier()}
 	// }
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	// set for being calle in parseExpression with prefix()
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 
 	// 2つトークンを読み込む -> curTokenとpeekTokenの両方がセットされる
 	p.nextToken()
@@ -91,6 +94,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	// }
 
 	for p.curToken.Type != token.EOF {
+		// will call parseStatement
 		stmt := p.parseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
@@ -108,7 +112,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		// when match neither 'let' nor 'return'
+		// when match neither 'let' nor 'return'(like token.INT)
 		return p.parseExpressionStatement()
 	}
 }
@@ -189,15 +193,31 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
+// precedence is the priority
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
 		return nil
 	}
+	// call function based on prefixParseFns[p.curToken.Type]
+	// return ast.Expression
 	leftExp := prefix()
 	return leftExp
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	lit := &ast.IntegerLiteral{Token: p.curToken}
+	// change from string to u64
+	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	lit.Value = value
+	return lit
 }

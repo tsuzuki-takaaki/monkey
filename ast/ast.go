@@ -133,6 +133,9 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
+// Expression type is duck typing, so all types that hava Expression interface apply
+// like Identifier
+
 func (i *ExpressionStatement) statementNode()       {}
 func (i *ExpressionStatement) TokenLiteral() string { return i.Token.Literal }
 func (es *ExpressionStatement) String() string {
@@ -142,3 +145,12 @@ func (es *ExpressionStatement) String() string {
 
 	return ""
 }
+
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode()      {}
+func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
+func (il *IntegerLiteral) String() string       { return il.Token.Literal }
