@@ -90,6 +90,8 @@ func (ls *LetStatement) String() string {
 	return out.String()
 }
 
+// this struct is a member of Expression
+// duck typing
 type Identifier struct {
 	Token token.Token // token.IDENT token
 	Value string

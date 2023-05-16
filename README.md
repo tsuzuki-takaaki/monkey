@@ -139,5 +139,16 @@ https://ja.wikipedia.org/wiki/%E3%83%91%E3%83%BC%E3%82%B5%E3%82%B8%E3%82%A7%E3%8
 ```go
   fmt.Printf("%+v\n", someStruct)
 ```
+- Goのiota
+  - 定数定義ないの定数に対して、番号を振り分けてくれる
+  - ↓ それぞれの定数に対して、0, 1, 2, 3が割り振られる
+```go
+  const (
+      zero  = iota
+      one
+      two
+      three
+  )
+```
 
 https://qiita.com/rock619/items/db44507d02814e490902
