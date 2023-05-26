@@ -262,6 +262,28 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}
 }
 
+func TestBooleanExpression(t *testing.T) {
+	input := "true;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	testStatementStructure(t, program)
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	bol, ok := stmt.Expression.(*ast.Boolean)
+	if !ok {
+		t.Errorf("stmt not *ast.Boolean. got=%T", stmt)
+	}
+	if bol.Value != true {
+		t.Errorf("bol.Value not %t. got=%t", true, bol.Value)
+	}
+	if bol.TokenLiteral() != "true" {
+		t.Errorf("bol.TokenLiteral not %s. got=%s", "true", bol.TokenLiteral())
+	}
+}
+
 // ↓ helper
 // Parser instanceのerrors propertyが空でなければ、parseする際に何らかのエラーが生じてる
 func checkParserErrors(t *testing.T, p *Parser) {

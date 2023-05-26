@@ -78,6 +78,7 @@ func New(l *lexer.Lexer) *Parser {
 	// 	prefixParseFns: {token.IDENT: parseIdentifier()}
 	// }
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
+	p.registerPrefix(token.TRUE, p.parserBoolean)
 	// set for being calle in parseExpression with prefix()
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
@@ -238,6 +239,10 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	}
 	lit.Value = value
 	return lit
+}
+
+func (p *Parser) parserBoolean() ast.Expression {
+	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
 }
 
 // this function is for 「!」 or 「-」
