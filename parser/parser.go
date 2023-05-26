@@ -79,6 +79,7 @@ func New(l *lexer.Lexer) *Parser {
 	// }
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.TRUE, p.parserBoolean)
+	p.registerPrefix(token.FALSE, p.parserBoolean)
 	// set for being calle in parseExpression with prefix()
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
