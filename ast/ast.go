@@ -105,6 +105,16 @@ func (i *Identifier) String() string       { return i.Value }
 // Token   ReturnValue
 //
 // return       5
+//
+// example
+//
+//	&ReturnStatement {
+//		Token: token.Token{Type: token.RETURN, Literal: "return"},
+//		ReturnValue: &Expression[duck typing] {
+//			Token: token.Token{Type: token.INT, Literal: "5"}
+//			Value: 5
+//		}
+//	}
 type ReturnStatement struct {
 	Token       token.Token // token.RETURN
 	ReturnValue Expression
