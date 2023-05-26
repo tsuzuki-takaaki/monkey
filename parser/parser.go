@@ -20,6 +20,18 @@ const ( // LOWER
 	CALL         // myFunction(X)
 ) // HIGHER
 
+// mapping of token and priority
+var precedences = map[token.TokenType]int{
+	token.EQ:        EQUALS,
+	token.NOT_EQ:    EQUALS,
+	token.LT:        LESSGRREATER,
+	token.GT:        LESSGRREATER,
+	token.PLUS:      SUM,
+	token.MINUS:     SUM,
+	token.SLASH:     PRODUCT,
+	token.ASTERRISK: PRODUCT,
+}
+
 type Parser struct {
 	l              *lexer.Lexer // pointer of Lexer instance
 	errors         []string
@@ -31,7 +43,7 @@ type Parser struct {
 
 type (
 	prefixParseFn func() ast.Expression
-	infixParseFn  func() ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
 )
 
 // {Type:LET Literal:let}
@@ -71,6 +83,17 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 
+	// register function for infix operator
+	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+
+	p.registerInfix(token.PLUS, p.parseInfixExpression)
+	p.registerInfix(token.MINUS, p.parseInfixExpression)
+	p.registerInfix(token.SLASH, p.parseInfixExpression)
+	p.registerInfix(token.ASTERRISK, p.parseInfixExpression)
+	p.registerInfix(token.EQ, p.parseInfixExpression)
+	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
+	p.registerInfix(token.LT, p.parseInfixExpression)
+	p.registerInfix(token.GT, p.parseInfixExpression)
 	// 2つトークンを読み込む -> curTokenとpeekTokenの両方がセットされる
 	p.nextToken()
 	p.nextToken()
@@ -95,6 +118,7 @@ func (p *Parser) nextToken() {
 // lexerもparserも同時に動かして、最終的にProgram構造体を構成する
 func (p *Parser) ParseProgram() *ast.Program {
 	// initialize Program(root node)
+	// this struct is the result of lexer and parser
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 	// Ex.
@@ -109,11 +133,12 @@ func (p *Parser) ParseProgram() *ast.Program {
 	for p.curToken.Type != token.EOF {
 		stmt := p.parseStatement()
 		if stmt != nil {
+			// Add node like LetStatement, ReturnStatement, ...etc
 			program.Statements = append(program.Statements, stmt)
 		}
 		p.nextToken()
 	}
-
+	// return finished Tree
 	return program
 }
 
@@ -174,6 +199,74 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
+// precedence is the priority
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.curToken.Type]
+	if prefix == nil {
+		p.noPrefixParseFnError(p.curToken.Type)
+		return nil
+	}
+	// call function based on prefixParseFns[p.curToken.Type]
+	// return ast.Expression
+	leftExp := prefix()
+	// ここが天才的(隣同士の比較も、跨いだ比較にも対応してる)
+	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
+		// curTokenじゃなくて、peekTokenにmappingされた関数をcall
+		infix := p.infixParseFns[p.peekToken.Type]
+		if infix == nil {
+			return leftExp
+		}
+		p.nextToken()
+		leftExp = infix(leftExp)
+	}
+
+	return leftExp
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	lit := &ast.IntegerLiteral{Token: p.curToken}
+	// change from string to u64
+	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	lit.Value = value
+	return lit
+}
+
+// this function is for 「!」 or 「-」
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+	}
+	p.nextToken()
+	expression.Right = p.parseExpression(PREFIX)
+	return expression
+}
+
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	expression := &ast.InfixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+		Left:     left,
+	}
+
+	// store priority
+	precedence := p.curPrecedence()
+	p.nextToken()
+	// tokenを次に進めて、現在のtokenの右側にあるtokenをparseする(この時、現在のtokenの優先度を引数に渡す)
+	expression.Right = p.parseExpression(precedence)
+
+	return expression
+}
+
 // helper
 // 引数に渡されたtokenとcurTokenが一致しているか判定する
 func (p *Parser) curTokenIs(t token.TokenType) bool {
@@ -210,42 +303,16 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	p.errors = append(p.errors, msg)
 }
 
-// precedence is the priority
-func (p *Parser) parseExpression(precedence int) ast.Expression {
-	prefix := p.prefixParseFns[p.curToken.Type]
-	if prefix == nil {
-		p.noPrefixParseFnError(p.curToken.Type)
-		return nil
+func (p *Parser) peekPrecedence() int {
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
 	}
-	// call function based on prefixParseFns[p.curToken.Type]
-	// return ast.Expression
-	leftExp := prefix()
-	return leftExp
+	return LOWEST
 }
 
-func (p *Parser) parseIdentifier() ast.Expression {
-	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-}
-
-func (p *Parser) parseIntegerLiteral() ast.Expression {
-	lit := &ast.IntegerLiteral{Token: p.curToken}
-	// change from string to u64
-	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
-	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
-		p.errors = append(p.errors, msg)
-		return nil
+func (p *Parser) curPrecedence() int {
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
 	}
-	lit.Value = value
-	return lit
-}
-
-func (p *Parser) parsePrefixExpression() ast.Expression {
-	expression := &ast.PrefixExpression{
-		Token:    p.curToken,
-		Operator: p.curToken.Literal,
-	}
-	p.nextToken()
-	expression.Right = p.parseExpression(PREFIX)
-	return expression
+	return LOWEST
 }

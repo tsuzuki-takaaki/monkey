@@ -9,7 +9,7 @@ type Token struct {
 
 // Token Type(スクリプト言語をこれにマッピングする)
 const (
-						// TokenType
+	// 参照定数 = TokenType
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
 
@@ -26,7 +26,7 @@ const (
 	SLASH     = "/"
 
 	LT = "<"
-	RT = ">"
+	GT = ">"
 
 	EQ     = "=="
 	NOT_EQ = "!="

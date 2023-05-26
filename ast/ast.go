@@ -161,7 +161,7 @@ func (es *ExpressionStatement) String() string {
 //	ExpressionStatement {
 //		Token: some
 //		Expression: IntegerLiteral {
-//			Token: some
+//			Token: some(Token.INT)
 //			Value: some
 //		}
 //	}
@@ -174,6 +174,19 @@ func (il *IntegerLiteral) expressionNode()      {}
 func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
 func (il *IntegerLiteral) String() string       { return il.Token.Literal }
 
+// example
+//
+//	&ExpressionStatement {
+//		Token: Token.MINUS,
+//		Expression: &PrefixExpression {
+//			Token: Token.MINUS,
+//			Operator: "!",
+//			Right: &IntegerLiteral {
+//				Token: Token.INT,
+//				Value: 5,
+//			}
+//		}
+//	}
 type PrefixExpression struct {
 	Token    token.Token // ex. BANG
 	Operator string      // 「!」 or 「-」
@@ -187,6 +200,27 @@ func (pe *PrefixExpression) String() string {
 	out.WriteString("(")
 	out.WriteString(pe.Operator)
 	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+type InfixExpression struct {
+	Token token.Token // operator token like +, -, ...etc
+	Left Expression
+	Operator string
+	Right Expression
+}
+
+func (oe *InfixExpression) expressionNode() {}
+func (oe *InfixExpression) TokenLiteral() string { return oe.Token.Literal }
+func (oe *InfixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(oe.Left.String())
+	out.WriteString(" " + oe.Operator + " ")
+	out.WriteString(oe.Right.String())
 	out.WriteString(")")
 
 	return out.String()
