@@ -3,12 +3,13 @@ package token
 type TokenType string // name string type TokenType(stirng == TokenType)
 
 type Token struct {
-	Type    TokenType
+	Type    TokenType // INT, =, ;, ...etc
 	Literal string
 }
 
 // Token Type(スクリプト言語をこれにマッピングする)
 const (
+						// TokenType
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
 

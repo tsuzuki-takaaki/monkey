@@ -34,14 +34,24 @@ type (
 	infixParseFn  func() ast.Expression
 )
 
-// l: token sequence
-// let hello = 5;
-// ↓
 // {Type:LET Literal:let}
 // {Type:IDENT Literal:hello}
 // {Type:= Literal:=}
 // {Type:INT Literal:5}
 // {Type:; Literal:;}
+// ↑ これが引数になるわけではない(lexerとともに逐次的に構成されていく)
+//
+//	&Parser {
+//		l: &Lexer {
+//			input: "let x = 5;",
+//			position:
+//			...
+//		}
+//		errors:
+//		curToken:
+//		peekToken:
+//	  ...
+//	}
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		l:      l,
@@ -82,6 +92,7 @@ func (p *Parser) nextToken() {
 	p.peekToken = p.l.NextToken()
 }
 
+// lexerもparserも同時に動かして、最終的にProgram構造体を構成する
 func (p *Parser) ParseProgram() *ast.Program {
 	// initialize Program(root node)
 	program := &ast.Program{}
