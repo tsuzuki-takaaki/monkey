@@ -274,7 +274,7 @@ func (ie *IfExpression) String() string {
 //		Token: Token.MINUS,
 //		Expression: &PrefixExpression {
 //			Token: Token.MINUS,
-//			Operator: "!",
+//			Operator: "-",
 //			Right: &IntegerLiteral {
 //				Token: Token.INT,
 //				Value: 5,
