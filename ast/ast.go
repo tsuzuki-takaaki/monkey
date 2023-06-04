@@ -50,18 +50,17 @@ func (p *Program) String() string {
 //
 //	let    x  =  5
 //
-// example -> &{Token:{Type:LET Literal:let} Name:0xc00007e5d0 Value:<nil>}
 // ↓ AST examples
 //
 //	&LetStatement{
 //		Token: token.Token{Type: token.LET, Literal: "let"},
 //		Name: &Identifier{
-//			Token: token.Token{Type: token.IDENT, Literal: "myVar"},
-//			Value: "myVar",
+//			Token: token.Token{Type: token.IDENT, Literal: "x"},
+//			Value: "x",
 //		},
-//		Value: &Identifier{
-//			Token: token.Token{Type: token.IDENT, Literal: "anotherVar"},
-//			Value: "anotherVar",
+//		Value: &IntegerLiteral{
+//			Token: token.Token{Type: token.INT, Literal: "5"},
+//			Value: 5,
 //		},
 //	},
 type LetStatement struct {
